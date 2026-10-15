@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed Trades</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="/">Price Chart</a>
+        <a href="/stats">Trade Statistics</a>
+        <a href="/trades">Detailed Trades</a>
+    </nav>
+
+    <main class="container">
+        <h1>Detailed Trade Record</h1>
+        <div class="table-wrap">
+            <table id="tradesTable">
+                <thead>
+                    <tr>
+                        <th>Buy Date</th>
+                        <th>Buy Price</th>
+                        <th>Sell Date</th>
+                        <th>Sell Price</th>
+                        <th>Holding Days</th>
+                        <th>Profit %</th>
+                        <th>Sell Reason</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        async function loadTrades() {
+            const response = await fetch('/api/strategy');
+            const data = await response.json();
+            const tbody = document.querySelector('#tradesTable tbody');
+
+            tbody.innerHTML = data.trades.map(trade => `
+                <tr>
+                    <td>${trade.BuyDate}</td>
+                    <td>$${Number(trade.BuyPrice).toFixed(2)}</td>
+                    <td>${trade.SellDate}</td>
+                    <td>$${Number(trade.SellPrice).toFixed(2)}</td>
+                    <td>${trade.HoldingDays}</td>
+                    <td>${Number(trade.ProfitPct).toFixed(2)}%</td>
+                    <td>${trade.SellReason}</td>
+                </tr>
+            `).join('');
+        }
+
+        loadTrades();
+    </script>
+</body>
+</html>

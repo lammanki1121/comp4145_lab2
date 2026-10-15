@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Statistics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="/">Price Chart</a>
+        <a href="/stats">Trade Statistics</a>
+        <a href="/trades">Detailed Trades</a>
+    </nav>
+
+    <main class="container">
+        <h1>Overall Trade Statistics</h1>
+        <div class="stats-grid" id="statsGrid"></div>
+    </main>
+
+    <script>
+        async function loadStats() {
+            const response = await fetch('/api/strategy');
+            const data = await response.json();
+            const stats = data.stats;
+
+            const cards = [
+                { label: 'Total Trades', value: stats.total_trades },
+                { label: 'Winning Trades', value: stats.winning_trades },
+                { label: 'Losing Trades', value: stats.losing_trades },
+                { label: 'Win Rate', value: `${stats.win_rate}%` },
+                { label: 'Average Profit', value: `${stats.avg_profit}%` },
+                { label: 'Average Holding Days', value: stats.average_holding_days },
+                { label: 'Target Reached', value: stats.target_reached },
+                { label: 'Max Holding Period Exit', value: stats.max_period }
+            ];
+
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = cards.map(card => `
+                <div class="stat-card">
+                    <div class="stat-label">${card.label}</div>
+                    <div class="stat-value">${card.value}</div>
+                </div>
+            `).join('');
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>

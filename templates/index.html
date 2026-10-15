@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSFT Trading Strategy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="/">Price Chart</a>
+        <a href="/stats">Trade Statistics</a>
+        <a href="/trades">Detailed Trades</a>
+    </nav>
+
+    <main class="container">
+        <h1>MSFT Trading Strategy Overview</h1>
+        <div class="card">
+            <canvas id="priceChart" height="120"></canvas>
+        </div>
+    </main>
+
+    <script>
+        async function loadStrategyData() {
+            const response = await fetch('/api/strategy');
+            const data = await response.json();
+
+            const labels = data.chart.map(item => item.date);
+            const close = data.chart.map(item => item.Close);
+            const ma50 = data.chart.map(item => item.MA50);
+            const ma200 = data.chart.map(item => item.MA200);
+
+            const buyPoints = data.buy_points.map(point => ({ x: point.date, y: point.price }));
+            const sellPoints = data.sell_points.map(point => ({ x: point.date, y: point.price }));
+
+            new Chart(document.getElementById('priceChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Close Price',
+                            data: close,
+                            borderColor: '#2563eb',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'MA 50',
+                            data: ma50,
+                            borderColor: '#f59e0b',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.1,
+                            borderDash: [5, 5],
+                            fill: false
+                        },
+                        {
+                            label: 'MA 200',
+                            data: ma200,
+                            borderColor: '#10b981',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.1,
+                            borderDash: [5, 5],
+                            fill: false
+                        },
+                        {
+                            type: 'scatter',
+                            label: 'Buy Signal',
+                            data: buyPoints,
+                            pointBackgroundColor: '#22c55e',
+                            pointRadius: 6,
+                            pointHoverRadius: 7,
+                            showLine: false
+                        },
+                        {
+                            type: 'scatter',
+                            label: 'Sell Signal',
+                            data: sellPoints,
+                            pointBackgroundColor: '#ef4444',
+                            pointRadius: 6,
+                            pointHoverRadius: 7,
+                            showLine: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'MSFT Price and Moving Averages'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Price ($)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        loadStrategyData();
+    </script>
+</body>
+</html>
